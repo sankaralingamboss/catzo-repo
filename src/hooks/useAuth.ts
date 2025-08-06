@@ -16,6 +16,21 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!supabase) {
+      // Demo mode - check localStorage
+      const demoUser = localStorage.getItem('demo-user');
+      if (demoUser) {
+        const userData = JSON.parse(demoUser);
+        setUser({
+          id: userData.id,
+          email: userData.email,
+          name: userData.name
+        });
+      }
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -41,6 +56,8 @@ export const useAuth = () => {
   }, []);
 
   const fetchUserProfile = async (authUser: User) => {
+    if (!supabase) return;
+
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
@@ -94,6 +111,8 @@ export const useAuth = () => {
   };
 
   const signUp = async (email: string, password: string, name: string) => {
+    if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -107,6 +126,8 @@ export const useAuth = () => {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -115,11 +136,20 @@ export const useAuth = () => {
   };
 
   const signOut = async () => {
+    if (!supabase) return { error: new Error('Supabase not initialized') };
+
+    // Also clear demo user
+    localStorage.removeItem('demo-user');
+    localStorage.removeItem('demo-cart');
+    localStorage.removeItem('demo-orders');
+    setUser(null);
+
     const { error } = await supabase.auth.signOut();
     return { error };
   };
 
   const updateProfile = async (updates: Partial<AuthUser>) => {
+    if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
     if (!user) return { error: new Error('No user logged in') };
 
     const { data, error } = await supabase

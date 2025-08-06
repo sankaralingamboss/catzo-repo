@@ -40,6 +40,14 @@ export const useOrders = () => {
   }, [user]);
 
   const fetchOrders = async () => {
+    if (!supabase) {
+      // Demo mode - use localStorage
+      const savedOrders = localStorage.getItem('demo-orders');
+      if (savedOrders) {
+        setOrders(JSON.parse(savedOrders));
+      }
+      return;
+    }
     if (!user) return;
 
     try {
@@ -105,6 +113,47 @@ export const useOrders = () => {
     deliveryDate: string;
     notes?: string;
   }, cartItems: CartItem[]) => {
+    if (!supabase) {
+      // Demo mode - create mock order
+      if (cartItems.length === 0) return null;
+      
+      const totalAmount = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+      const orderNumber = `ORD${Date.now()}`;
+      
+      const mockOrder: Order = {
+        id: `demo-${Date.now()}`,
+        orderNumber,
+        customerName: orderData.customerName,
+        customerEmail: orderData.customerEmail,
+        customerPhone: orderData.customerPhone,
+        deliveryAddress: orderData.deliveryAddress,
+        paymentMethod: orderData.paymentMethod,
+        totalAmount,
+        deliveryDate: orderData.deliveryDate,
+        status: 'pending',
+        notes: orderData.notes,
+        createdAt: new Date().toISOString(),
+        items: cartItems.map(item => ({
+          id: `item-${Date.now()}-${Math.random()}`,
+          productId: item.id,
+          productName: item.name,
+          productPrice: item.price,
+          quantity: item.quantity,
+          subtotal: item.price * item.quantity
+        }))
+      };
+      
+      // Save to localStorage
+      const existingOrders = JSON.parse(localStorage.getItem('demo-orders') || '[]');
+      const updatedOrders = [mockOrder, ...existingOrders];
+      localStorage.setItem('demo-orders', JSON.stringify(updatedOrders));
+      setOrders(updatedOrders);
+      
+      // Clear cart
+      localStorage.removeItem('demo-cart');
+      
+      return mockOrder;
+    }
     if (!user || cartItems.length === 0) return null;
 
     try {

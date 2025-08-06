@@ -27,6 +27,38 @@ const LoginForm: React.FC<LoginFormProps> = ({ onBack }) => {
     setError(null);
 
     try {
+      // Demo mode fallback
+      if (!supabase) {
+        if (isLogin) {
+          // Demo login - accept any email/password
+          if (data.email && data.password) {
+            // Create demo user session
+            const demoUser = {
+              id: 'demo-user',
+              email: data.email,
+              name: data.email.split('@')[0]
+            };
+            localStorage.setItem('demo-user', JSON.stringify(demoUser));
+            window.location.reload(); // Refresh to trigger auth state change
+            return;
+          } else {
+            setError('Please enter email and password');
+            return;
+          }
+        } else {
+          // Demo signup
+          if (data.email && data.password && data.name) {
+            alert('Demo mode: Registration successful! Now please sign in.');
+            setIsLogin(true);
+            reset();
+            return;
+          } else {
+            setError('Please fill all fields');
+            return;
+          }
+        }
+      }
+
       if (isLogin) {
         const { error } = await signIn(data.email, data.password);
         if (error) {

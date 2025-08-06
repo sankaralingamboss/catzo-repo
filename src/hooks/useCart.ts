@@ -22,6 +22,15 @@ export const useCart = () => {
   }, [user]);
 
   const fetchCart = async () => {
+    if (!supabase) {
+      // Use localStorage for demo mode
+      const savedCart = localStorage.getItem('demo-cart');
+      if (savedCart) {
+        setCartItems(JSON.parse(savedCart));
+      }
+      return;
+    }
+
     if (!user) return;
 
     try {
@@ -75,6 +84,31 @@ export const useCart = () => {
   };
 
   const addToCart = async (product: Product, quantity: number = 1) => {
+    if (!supabase) {
+      // Demo mode - use localStorage
+      const existingItem = cartItems.find(item => item.id === product.id);
+      
+      if (existingItem) {
+        const newQuantity = existingItem.quantity + quantity;
+        const updatedCart = cartItems.map(item => 
+          item.id === product.id 
+            ? { ...item, quantity: newQuantity }
+            : item
+        );
+        setCartItems(updatedCart);
+        localStorage.setItem('demo-cart', JSON.stringify(updatedCart));
+      } else {
+        const newCartItem: CartItem = {
+          ...product,
+          quantity,
+          cartItemId: `demo-${Date.now()}`
+        };
+        const updatedCart = [...cartItems, newCartItem];
+        setCartItems(updatedCart);
+        localStorage.setItem('demo-cart', JSON.stringify(updatedCart));
+      }
+      return true;
+    }
     if (!user) return false;
 
     try {
@@ -133,6 +167,21 @@ export const useCart = () => {
   };
 
   const updateQuantity = async (cartItemId: string, quantity: number) => {
+    if (!supabase) {
+      // Demo mode
+      if (quantity <= 0) {
+        return await removeFromCart(cartItemId);
+      }
+      
+      const updatedCart = cartItems.map(item => 
+        item.cartItemId === cartItemId 
+          ? { ...item, quantity }
+          : item
+      );
+      setCartItems(updatedCart);
+      localStorage.setItem('demo-cart', JSON.stringify(updatedCart));
+      return true;
+    }
     if (!user) return false;
 
     try {
@@ -164,6 +213,13 @@ export const useCart = () => {
   };
 
   const removeFromCart = async (cartItemId: string) => {
+    if (!supabase) {
+      // Demo mode
+      const updatedCart = cartItems.filter(item => item.cartItemId !== cartItemId);
+      setCartItems(updatedCart);
+      localStorage.setItem('demo-cart', JSON.stringify(updatedCart));
+      return true;
+    }
     if (!user) return false;
 
     try {
@@ -186,6 +242,12 @@ export const useCart = () => {
   };
 
   const clearCart = async () => {
+    if (!supabase) {
+      // Demo mode
+      setCartItems([]);
+      localStorage.removeItem('demo-cart');
+      return true;
+    }
     if (!user) return false;
 
     try {

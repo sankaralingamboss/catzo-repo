@@ -11,6 +11,14 @@ const AppContent: React.FC = () => {
   const { user, authLoading } = useApp();
   const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'catalog'>('landing');
 
+  // Check for demo user in localStorage
+  useEffect(() => {
+    const demoUser = localStorage.getItem('demo-user');
+    if (demoUser && !user) {
+      // Demo mode is active, but we'll let the auth hook handle it
+    }
+  }, [user]);
+
   // Show loading spinner while checking authentication
   if (authLoading) {
     return <LoadingSpinner />;

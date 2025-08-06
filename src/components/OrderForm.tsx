@@ -35,12 +35,18 @@ export default function OrderForm() {
 
   const sendOrderConfirmationEmail = async (order: any) => {
     try {
+      // Check if EmailJS is available
+      if (!window.emailjs) {
+        console.warn('EmailJS not loaded, skipping email send');
+        return;
+      }
+
       console.log('📧 Starting email send process...');
       console.log('Customer email:', order.email);
       console.log('Order details:', order);
       
       // Initialize EmailJS - this is critical!
-      await emailjs.init('WhOowWnfA9wLbW9-O');
+      await window.emailjs.init('WhOowWnfA9wLbW9-O');
       console.log('✅ EmailJS initialized successfully');
       
       // Prepare email parameters - matching your template exactly
@@ -72,7 +78,7 @@ export default function OrderForm() {
       console.log('📧 Sending to:', order.email);
       
       // Send email with your exact IDs
-      const response = await emailjs.send(
+      const response = await window.emailjs.send(
         'service_l0lmsol',    // Your Service ID
         'template_ueaxw5r',   // Your Template ID
         emailParams,

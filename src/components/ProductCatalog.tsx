@@ -9,6 +9,7 @@ import OrderForm from './OrderForm';
 import LoadingSpinner from './LoadingSpinner';
 import Logo from './Logo';
 import AdminPanel from './AdminPanel';
+import DemoModeIndicator from './DemoModeIndicator';
 
 const ProductCatalog: React.FC = () => {
   const { 
@@ -54,7 +55,11 @@ const ProductCatalog: React.FC = () => {
   ];
 
   const handleLogout = async () => {
-    await signOut();
+    const { error } = await signOut();
+    if (!error || !supabase) {
+      // Force reload for demo mode or successful logout
+      window.location.reload();
+    }
   };
 
   if (productsLoading) {
@@ -169,6 +174,8 @@ const ProductCatalog: React.FC = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <DemoModeIndicator />
+
         {/* Category Filter */}
         <div className="mb-8">
           <div className="space-y-4">
