@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "setup": "npm install && echo 'Setup complete! Run npm run dev to start.'"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

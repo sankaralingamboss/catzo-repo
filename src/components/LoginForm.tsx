@@ -25,20 +25,24 @@ const LoginForm: React.FC<LoginFormProps> = ({ onBack }) => {
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     setError(null);
+    
+    console.log('Login attempt:', { email: data.email, isLogin });
 
     try {
       // Demo mode fallback
       if (!supabase) {
+        console.log('Demo mode login');
         if (isLogin) {
           // Demo login - accept any email/password
           if (data.email && data.password) {
             // Create demo user session
             const demoUser = {
-              id: 'demo-user',
+              id: 'demo-user-' + Date.now(),
               email: data.email,
               name: data.email.split('@')[0]
             };
             localStorage.setItem('demo-user', JSON.stringify(demoUser));
+            console.log('Demo user created:', demoUser);
             window.location.reload(); // Refresh to trigger auth state change
             return;
           } else {
@@ -60,8 +64,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onBack }) => {
       }
 
       if (isLogin) {
+        console.log('Attempting Supabase login');
         const { error } = await signIn(data.email, data.password);
         if (error) {
+          console.error('Login error:', error);
           setError(error.message);
         }
       } else {
@@ -71,6 +77,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onBack }) => {
         }
         const { error } = await signUp(data.email, data.password, data.name);
         if (error) {
+          console.error('Signup error:', error);
           setError(error.message);
         } else {
           setError(null);
@@ -217,10 +224,19 @@ const LoginForm: React.FC<LoginFormProps> = ({ onBack }) => {
 
         <button
           onClick={onBack}
-          className="mt-4 w-full text-gray-500 hover:text-gray-700 py-2 text-sm"
+          className="mt-4 w-full text-gray-500 hover:text-gray-700 py-2 text-sm transition-colors"
         >
           ← Back to Home
         </button>
+        
+        {/* Demo Mode Helper */}
+        {!supabase && (
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-xs text-blue-700 text-center">
+              🚀 <strong>Demo Mode:</strong> Use any email/password to login instantly!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

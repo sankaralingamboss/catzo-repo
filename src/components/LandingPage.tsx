@@ -1,12 +1,29 @@
 import React from 'react';
 import { ArrowRight, Heart, ShoppingBag, Phone, Mail } from 'lucide-react';
 import Logo from './Logo';
+import { supabase } from '../lib/supabase';
 
 interface LandingPageProps {
   onGetStarted: () => void;
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
+  const handleGetStarted = () => {
+    console.log('Get Started clicked');
+    onGetStarted();
+  };
+
+  const handleDemoLogin = () => {
+    // Create demo user for immediate access
+    const demoUser = {
+      id: 'demo-user-' + Date.now(),
+      email: 'demo@catzo.com',
+      name: 'Demo User'
+    };
+    localStorage.setItem('demo-user', JSON.stringify(demoUser));
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-green-50">
       {/* Header */}
@@ -47,12 +64,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             </p>
             
             <button
-              onClick={onGetStarted}
+              onClick={handleGetStarted}
               className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-orange-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center"
             >
               Start Shopping
               <ArrowRight className="ml-2 w-5 h-5" />
             </button>
+            
+            {/* Demo Mode Button */}
+            {!supabase && (
+              <div className="mt-6">
+                <p className="text-sm text-gray-600 mb-3">
+                  🚀 <strong>Quick Demo:</strong> Try the app instantly without signup
+                </p>
+                <button
+                  onClick={handleDemoLogin}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  🎯 Try Demo Mode
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
